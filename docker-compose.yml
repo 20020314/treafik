@@ -44,5 +44,5 @@ services:
 networks:
   webgateway:
     external:
-      # 请先自行创建网络 docker network create dykimy_gateway 名字自己定义
-      name: dykimy_gateway
+      # 请先自行创建网络 docker network create auto_gateway 名字自己定义
+      name: auto_gateway
