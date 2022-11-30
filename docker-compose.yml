@@ -1,0 +1,48 @@
+version: "3.7"
+services:
+  dykimy_traefik:
+    restart: always
+    image: traefik:v2.1.6
+    container_name: dykimy_traefik
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      # 入口点信息 其中 http & https 可以自己定义名称 在routers entrypoints中会用到
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.https.address=:443"
+      # ACME信息
+      - "--certificatesresolvers.dykimy.acme.httpchallenge=true"
+      - "--certificatesresolvers.dykimy.acme.httpchallenge.entrypoint=http"
+      - "--certificatesresolvers.dykimy.acme.email=${AcmeEmail}"
+      - "--certificatesresolvers.dykimy.acme.storage=/letsencrypt/acme.json"
+    networks:
+      - webgateway
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "./letsencrypt:/letsencrypt"
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/etc/timezone:/etc/timezone"
+      - "/etc/localtime:/etc/localtime"
+    labels:
+      - "traefik.enable=true"
+      # Traefik仪表板相关配置
+      - "traefik.http.routers.dykimy_traefik.rule=Host(`${TraefikDomain}`)"
+      - "traefik.http.routers.dykimy_traefik.tls.certresolver=dykimy"
+      - "traefik.http.routers.dykimy_traefik.entrypoints=https"
+      - "traefik.http.routers.dykimy_traefik.middlewares=authtraefik"
+      - "traefik.http.services.dykimy_traefik.loadbalancer.server.port=8080"
+      - "traefik.http.middlewares.authtraefik.basicauth.users=${TraefikUsers}"
+      # 全局重定向到HTTPS
+      - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
+      - "traefik.http.routers.http-catchall.entrypoints=http"
+      - "traefik.http.routers.http-catchall.middlewares=redirect-to-https"
+      # 重定向中间件
+      - "traefik.http.middlewares.redirect-to-https.redirectscheme.scheme=https"
+networks:
+  webgateway:
+    external:
+      # 请先自行创建网络 docker network create dykimy_gateway 名字自己定义
+      name: dykimy_gateway
