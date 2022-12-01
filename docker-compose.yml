@@ -2,7 +2,7 @@ version: "3.7"
 services:
   dykimy_traefik:
     restart: always
-    image: traefik:v2.1.6
+    image: traefik:v2.9
     container_name: dykimy_traefik
     command:
       - "--api.insecure=true"
@@ -34,7 +34,7 @@ services:
       - "traefik.http.routers.dykimy_traefik.entrypoints=https"
       - "traefik.http.routers.dykimy_traefik.middlewares=authtraefik"
       - "traefik.http.services.dykimy_traefik.loadbalancer.server.port=8080"
-      - "traefik.http.middlewares.authtraefik.basicauth.users=${TraefikUsers}"
+      #- "traefik.http.middlewares.authtraefik.basicauth.users=${TraefikUsers}"
       # 全局重定向到HTTPS
       - "traefik.http.routers.http-catchall.rule=hostregexp(`{host:.+}`)"
       - "traefik.http.routers.http-catchall.entrypoints=http"
