@@ -23,6 +23,12 @@ services:
       - ./traefik_dynamic.yml:/etc/traefik/dynamic_conf.yml
       - ./ssl.cer:/etc/ssl/certs/ssl.cer
       - ./ssl.key:/etc/ssl/private/ssl.key
+    deploy:
+      labels:
+        - "traefik.enable=true"
+        - "traefik.http.routers.traefik.entrypoints=web,websecure"
+        - "traefik.http.routers.traefik.rule=Host(`proxy.elysia.li`)"
+        - "traefik.http.services.traefik.loadbalancer.server.port=8080"
     command:
       - --api.insecure=true
       - --providers.docker
@@ -34,8 +40,3 @@ services:
       - --entryPoints.websecure.address=:443
       - --entryPoints.websecure.http.tls=true
       - --configfile=/etc/traefik/dynamic_conf.yml
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.traefik.entrypoints=web,websecure"
-      - "traefik.http.routers.traefik.rule=Host(`proxy.elysia.li`)"
-      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
