@@ -20,6 +20,7 @@ services:
       - /etc/localtime:/etc/localtime
       - /var/run/docker.sock:/var/run/docker.sock
       - acme:/etc/acme
+      - ./traefik_dynamic.yml:/etc/traefik/dynamic_conf.yml
       - ./ssl.cer:/etc/ssl/certs/ssl.cer
       - ./ssl.key:/etc/ssl/private/ssl.key
     command:
@@ -32,9 +33,8 @@ services:
       - --entryPoints.web.http.redirections.entrypoint.to=websecure
       - --entryPoints.websecure.address=:443
       - --entryPoints.websecure.http.tls=true
-      - --entryPoints.websecure.http.tls.certresolver=file
-      - --entryPoints.websecure.http.tls.certresolver.file.filename=/etc/ssl/certs/ssl.cer
-      - --entryPoints.websecure.http.tls.certresolver.file.privateKey=/etc/ssl/private/ssl.key
+      - --entryPoints.websecure.http.tls.certresolver=default
+      - --configfile=/etc/traefik/dynamic_conf.yml
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=web,websecure"
