@@ -20,8 +20,6 @@ services:
       - /etc/localtime:/etc/localtime
       - /var/run/docker.sock:/var/run/docker.sock
       - acme:/etc/acme
-    env_file:
-      - ./.alidns.env
     command:
       - --api.insecure=true
       - --providers.docker
@@ -36,8 +34,10 @@ services:
       - --entryPoints.websecure.http.tls.domains[0].main=elysia.li
       - --entryPoints.websecure.http.tls.domains[0].sans=*.elysia.li
       - --certificatesresolvers.ali.acme.dnschallenge.provider=alidns
-      - --certificatesresolvers.ali.acme.email=1767394@163.com
+      - --certificatesresolvers.ali.acme.email=chaikair@163.com
       - --certificatesresolvers.ali.acme.storage=/etc/acme/acme.json
+      - --certificatesresolvers.ali.acme.aliCloudAccessKey=LTAI5tCT3V2f51eJWt7ZXu12
+      - --certificatesresolvers.ali.acme.aliCloudSecretKey=jShCaahlnCsVHXyjaPMicm4ybg50XP
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.traefik.entrypoints=web, websecure"
