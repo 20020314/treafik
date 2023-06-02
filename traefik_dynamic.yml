@@ -1,7 +1,0 @@
-tls:
-  certificates:
-    - certFile: /etc/ssl/certs/ssl.cer
-      keyFile: /etc/ssl/private/ssl.key
-
-api:
-  insecure: true
