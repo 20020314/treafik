@@ -24,8 +24,8 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       # 下面 2 行是新增的内容
-      - ../../docker_config/traefik:/etc/traefik/config
-      - ../../docker_data/traefik/certs:/etc/traefik/certs
+      - /root/config:/etc/traefik/config
+      - /root/certs:/etc/traefik/certs
 networks:
   default:
     driver: bridge
