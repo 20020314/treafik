@@ -1,26 +1,55 @@
-version: '3'
-
-services:
-  moxy_traefik:
-    image: traefik:1.7.4
-    container_name: moxy_traefik
-    networks:
-      - webgateway
-    ports:
-      - '80:80'
-      - '443:443'
-      - '8090:8090'
-    labels:
-      - 'traefik.backend=qc_traefik'
-      - 'traefik.frontend.rule=Host:i.elysia.li'
-      - 'traefik.enable=true'
-      - 'traefik.protocol=http'
-      - 'traefik.port=8090'
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./traefik.toml:/traefik.toml
-      - ./acme.json:/acme.json
+version: "3.8"
+ 
 networks:
-  webgateway:
-    external:
-      name: moxy_gateway
+  proxy:
+    external: true
+volumes:
+  acme:
+services:
+  traefik:
+    image: traefik:v2.5.4
+    networks:
+      - proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      # 时区
+      - /etc/timezone:/etc/timezone
+      - /etc/localtime:/etc/localtime
+      # 使traefik能够监听到docker事件
+      - /var/run/docker.sock:/var/run/docker.sock
+      # 持久化acme生成的证书
+      - acme:/etc/acme
+    env_file:
+      - ./.alidns.env
+    # 开启web ui 监听docker 申请证书 使用的是阿里云买的域名
+    command:
+      - --api.insecure=true
+      - --providers.docker
+      - --providers.docker.network=proxy
+      # web http 80 请求进来 重定向到 下面的websecure
+      - --entryPoints.web.address=:80
+      - --entryPoints.web.http.redirections.entrypoint.permanene=true
+      - --entryPoints.web.http.redirections.entrypoint.scheme=https
+      - --entryPoints.web.http.redirections.entrypoint.to=websecure
+      # web secure https端口443
+      - --entryPoints.websecure.address=:443
+      # 自动ssl认证
+      - --entryPoints.websecure.http.tls=true
+      # ssh机构 阿里
+      - --entryPoints.websecure.http.tls.certresolver=ali
+      # 主域名 ，这里根据自己的域名填写
+      - --entryPoints.websecure.http.tls.domains[0].main=elysia.li
+      - --entryPoints.websecure.http.tls.domains[0].sans=*.elysia.li
+      - --certificatesresolvers.ali.acme.dnschallenge.provider=alidns
+      - --certificatesresolvers.ali.acme.email=chaikair@126.com
+      - --certificatesresolvers.ali.acme.storage=/etc/acme/acme.json
+    labels:
+      - "traefik.enable=true"
+      # 路由 上面的web和websecure
+      - "traefik.http.routers.traefik.entrypoints=web, websecure"
+      # 路由规则 自己的域名dengzhilin.fun
+      - "traefik.http.routers.traefik.rule=Host('proxy.elysia.li')"
+      # 负载均衡的端口
+      - "traefik.http.services.traefik.loadbalancer.server.port=8080"
