@@ -1,0 +1,33 @@
+version: '3.9'
+
+services:
+
+  traefik:
+    container_name: traefik
+    image: traefik:v2.9.1
+    restart: always
+    ports:
+      # The HTTP port
+      - 30080:80
+      # Https
+      - 443:443
+      # The Web UI (enabled by --api.insecure=true)
+      - "38080:8080"
+    networks:
+      - traefik
+    command: traefik --configFile /etc/traefik.toml
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./ssl/:/data/ssl/:ro
+      - ./traefik.toml:/etc/traefik.toml:ro
+      - ./config/:/etc/traefik/config/:ro
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider --proxy off localhost:8080/ping || exit 1"]
+      interval: 3s
+      timeout: 5s
+
+# 先创建外部网卡 docker network create traefik
+networks:
+  traefik:
+    external: true
