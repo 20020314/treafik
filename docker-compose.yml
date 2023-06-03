@@ -15,7 +15,25 @@ services:
       - "38080:8080"
     networks:
       - traefik
-    command: traefik --configFile /etc/traefik.toml
+    command:
+  - "--entrypoints.http.address=:80"
+  - "--entrypoints.https.address=:443"
+  - "--api=true"
+  - "--api.insecure=true"
+  - "--api.dashboard=true"
+  - "--api.debug=false"
+  - "--ping=true"
+  - "--providers.docker=true"
+  - "--providers.docker.watch=true"
+  - "--providers.docker.exposedbydefault=false"
+  - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+  - "--providers.docker.swarmMode=false"
+  - "--providers.docker.useBindPortIP=false"
+  - "--providers.docker.network=traefik"
+  - "--providers.file=true"
+  - "--providers.file.watch=true"
+  - "--providers.file.directory=/etc/traefik/config"
+  - "--providers.file.debugloggeneratedtemplate=true"
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock:ro
