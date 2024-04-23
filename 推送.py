@@ -1,14 +1,15 @@
 import requests
 import time
+import os
 
 # 钱包地址
-wallet_address = "43p8AgGKbhH198j4aTvwMb42PwT6Mc1qzYm7Bxg4y4DTESJtGAvzgGePtwqudFmz7RCi29fwkuG4ZLgxmmQzN8joADCEv9S"
+wallet_address = os.getenv('wallet')
 
 # pushdeer的URL
-push_url = "http://pushdeer.pushdeer.svc.cluster.local/message/push"
+push_url = os.getenv('push')
 
 # 您的PushKey
-push_key = "PDU1T17i2z1tREoB3e33z6C9yqdEdmlVJYaIQ"
+push_key = os.getenv('key')
 
 def get_miner_stats(wallet_address):
     url = f"https://supportxmr.com/api/miner/{wallet_address}/stats"
